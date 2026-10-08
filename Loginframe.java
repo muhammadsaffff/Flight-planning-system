@@ -3,7 +3,7 @@ import javax.swing.*;
 
 public class Loginframe extends JFrame {
 
-    LoginFrame() {
+    Loginframe() {
         setTitle("Flight Planning System");
         setSize(500, 300);
         setLayout(null);
@@ -23,6 +23,6 @@ public class Loginframe extends JFrame {
     }
 
     public static void main(String[] args) {
-        new LoginFrame();
+        new Loginframe();
     }
 }

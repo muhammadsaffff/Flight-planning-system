@@ -2,9 +2,9 @@ package flightmodules;
 
 import javax.swing.*;
 
-public class DashboardFrame extends JFrame {
+public class Dashboardframe extends JFrame {
 
-    DashboardFrame() {
+    Dashboardframe() {
         setTitle("Flight Planning System - Dashboard");
         setSize(600, 450);
         setLayout(null);
@@ -44,6 +44,6 @@ public class DashboardFrame extends JFrame {
     }
 
     public static void main(String[] args) {
-        new DashboardFrame();
+        new Dashboardframe();
     }
 }
