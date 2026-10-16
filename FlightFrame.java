@@ -1,58 +1,85 @@
 package flightmodules;
+
 import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
 
 public class FlightFrame extends JFrame {
 
     FlightFrame() {
         setTitle("Flight Details");
         setSize(500, 400);
-        setLayout(null);
+        setLayout(new BorderLayout(10, 10));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        JLabel title = new JLabel("FLIGHT DETAILS");
-        title.setBounds(180, 30, 200, 30);
+        JLabel title = new JLabel("FLIGHT DETAILS", JLabel.CENTER);
 
         JLabel from = new JLabel("Departure:");
-        from.setBounds(70, 90, 100, 25);
-
-        JTextField fromField = new JTextField();
-        fromField.setBounds(180, 90, 200, 25);
+        JTextField fromField = new JTextField(15);
 
         JLabel to = new JLabel("Destination:");
-        to.setBounds(70, 140, 100, 25);
-
-        JTextField toField = new JTextField();
-        toField.setBounds(180, 140, 200, 25);
+        JTextField toField = new JTextField(15);
 
         JLabel date = new JLabel("Date:");
-        date.setBounds(70, 190, 100, 25);
-
-        JTextField dateField = new JTextField();
-        dateField.setBounds(180, 190, 200, 25);
+        JTextField dateField = new JTextField(15);
 
         JLabel flightNo = new JLabel("Flight No:");
-        flightNo.setBounds(70, 240, 100, 25);
+        JTextField flightField = new JTextField(15);
 
-        JTextField flightField = new JTextField();
-        flightField.setBounds(180, 240, 200, 25);
+        JPanel formPanel = new JPanel(new GridLayout(4, 2, 10, 15));
+        formPanel.add(from);
+        formPanel.add(fromField);
+        formPanel.add(to);
+        formPanel.add(toField);
+        formPanel.add(date);
+        formPanel.add(dateField);
+        formPanel.add(flightNo);
+        formPanel.add(flightField);
 
-        add(title);
-        add(from);
-        add(fromField);
-        add(to);
-        add(toField);
-        add(date);
-        add(dateField);
-        add(flightNo);
-        add(flightField);
+        JPanel centerWrapper = new JPanel(new FlowLayout());
+        centerWrapper.add(formPanel);
+
+        JButton searchButton = new JButton("Search");
+        JButton backButton = new JButton("Back");
+
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        buttonPanel.add(searchButton);
+        buttonPanel.add(backButton);
+
+        searchButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String dep = fromField.getText().trim();
+                String dest = toField.getText().trim();
+                String dt = dateField.getText().trim();
+                String fltNo = flightField.getText().trim();
+
+                if (dep.isEmpty() || dest.isEmpty() || dt.isEmpty() || fltNo.isEmpty()) {
+                    JOptionPane.showMessageDialog(FlightFrame.this, "Please fill in all flight fields.");
+                } else if (dep.equalsIgnoreCase(dest)) {
+                    JOptionPane.showMessageDialog(FlightFrame.this, "Departure and Destination cannot be the same.");
+                } else {
+                    JOptionPane.showMessageDialog(FlightFrame.this, "Flight details validated successfully!");
+                }
+            }
+        });
+
+        backButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                new Dashboardframe();
+                dispose();
+            }
+        });
+
+        add(title, BorderLayout.NORTH);
+        add(centerWrapper, BorderLayout.CENTER);
+        add(buttonPanel, BorderLayout.SOUTH);
 
         setLocationRelativeTo(null);
         setVisible(true);
     }
 
-     
-     public static void main(String [] args)
-     {
-    	 new FlightFrame();
-     }
- }
+    public static void main(String [] args)
+    {
+        new FlightFrame();
+    }
+}
