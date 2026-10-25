@@ -1,60 +1,92 @@
 package flightmodules;
 
-
-
 import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
 
 public class BookFlightFrame extends JFrame {
 
     BookFlightFrame() {
         setTitle("Booking Details");
         setSize(500, 400);
-        setLayout(null);
+        setLayout(new BorderLayout(10, 10));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        JLabel title = new JLabel("BOOKING DETAILS");
-        title.setBounds(170, 30, 200, 30);
+        JLabel title = new JLabel("BOOKING DETAILS", JLabel.CENTER);
 
         JLabel passenger = new JLabel("Passenger:");
-        passenger.setBounds(70, 90, 100, 25);
-
-        JTextField passengerField = new JTextField();
-        passengerField.setBounds(180, 90, 200, 25);
+        JTextField passengerField = new JTextField(15);
 
         JLabel flight = new JLabel("Flight:");
-        flight.setBounds(70, 140, 100, 25);
-
-        JTextField flightField = new JTextField();
-        flightField.setBounds(180, 140, 200, 25);
+        JTextField flightField = new JTextField(15);
 
         JLabel travelClass = new JLabel("Travel Class:");
-        travelClass.setBounds(70, 190, 100, 25);
-
-        JTextField classField = new JTextField();
-        classField.setBounds(180, 190, 200, 25);
+        JTextField classField = new JTextField(15);
 
         JLabel fare = new JLabel("Fare:");
-        fare.setBounds(70, 240, 100, 25);
+        JTextField fareField = new JTextField(15);
 
-        JTextField fareField = new JTextField();
-        fareField.setBounds(180, 240, 200, 25);
+        JPanel formPanel = new JPanel(new GridLayout(4, 2, 10, 15));
+        formPanel.add(passenger);
+        formPanel.add(passengerField);
+        formPanel.add(flight);
+        formPanel.add(flightField);
+        formPanel.add(travelClass);
+        formPanel.add(classField);
+        formPanel.add(fare);
+        formPanel.add(fareField);
 
-        add(title);
-        add(passenger);
-        add(passengerField);
-        add(flight);
-        add(flightField);
-        add(travelClass);
-        add(classField);
-        add(fare);
-        add(fareField);
+        JPanel centerWrapper = new JPanel(new FlowLayout());
+        centerWrapper.add(formPanel);
+
+        JButton confirmButton = new JButton("Confirm Booking");
+        JButton backButton = new JButton("Back");
+
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        buttonPanel.add(confirmButton);
+        buttonPanel.add(backButton);
+
+        confirmButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String passText = passengerField.getText().trim();
+                String fltText = flightField.getText().trim();
+                String clsText = classField.getText().trim();
+                String fareText = fareField.getText().trim();
+
+                if (passText.isEmpty() || fltText.isEmpty() || clsText.isEmpty() || fareText.isEmpty()) {
+                    JOptionPane.showMessageDialog(BookFlightFrame.this, "Please fill in all booking fields.");
+                } else {
+                    try {
+                        double parsedFare = Double.parseDouble(fareText);
+                        if (parsedFare <= 0 || Double.isNaN(parsedFare) || Double.isInfinite(parsedFare)) {
+                            JOptionPane.showMessageDialog(BookFlightFrame.this, "Fare must be a valid amount greater than zero.");
+                        } else {
+                            JOptionPane.showMessageDialog(BookFlightFrame.this, "Booking Confirmed for " + passText + "!");
+                        }
+                    } catch (NumberFormatException ex) {
+                        JOptionPane.showMessageDialog(BookFlightFrame.this, "Invalid Fare! Please enter a valid numeric amount.");
+                    }
+                }
+            }
+        });
+
+        backButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                new Dashboardframe();
+                dispose();
+            }
+        });
+
+        add(title, BorderLayout.NORTH);
+        add(centerWrapper, BorderLayout.CENTER);
+        add(buttonPanel, BorderLayout.SOUTH);
 
         setLocationRelativeTo(null);
         setVisible(true);
     }
 
-public static void main(String [] agrs)
-	{
-		new BookFlightFrame();
-	}
+    public static void main(String [] agrs)
+    {
+        new BookFlightFrame();
+    }
 }

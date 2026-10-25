@@ -1,17 +1,18 @@
 package flightmodules;
 
 import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
 
 public class Managebookframe extends JFrame {
 
     Managebookframe() {
         setTitle("Travel History");
         setSize(600, 400);
-        setLayout(null);
+        setLayout(new BorderLayout(10, 10));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        JLabel title = new JLabel("TRAVEL HISTORY");
-        title.setBounds(230, 30, 200, 30);
+        JLabel title = new JLabel("TRAVEL HISTORY", JLabel.CENTER);
 
         String[] columns = {
             "Flight No", "Departure", "Destination", "Date", "Status"
@@ -25,15 +26,35 @@ public class Managebookframe extends JFrame {
         JTable table = new JTable(data, columns);
         JScrollPane scrollPane = new JScrollPane(table);
 
-        scrollPane.setBounds(30, 80, 520, 150);
+        JButton refreshButton = new JButton("Refresh");
+        JButton backButton = new JButton("Back");
 
-        add(title);
-        add(scrollPane);
+        JPanel southPanel = new JPanel(new FlowLayout());
+        southPanel.add(refreshButton);
+        southPanel.add(backButton);
+
+        refreshButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                JOptionPane.showMessageDialog(Managebookframe.this, "Travel history refreshed.");
+            }
+        });
+
+        backButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                new Dashboardframe();
+                dispose();
+            }
+        });
+
+        add(title, BorderLayout.NORTH);
+        add(scrollPane, BorderLayout.CENTER);
+        add(southPanel, BorderLayout.SOUTH);
 
         setLocationRelativeTo(null);
         setVisible(true);
     }
- public static void main(String[] args) {
+
+    public static void main(String[] args) {
         new Managebookframe();
     }
 }
