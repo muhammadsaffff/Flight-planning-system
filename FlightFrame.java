@@ -3,6 +3,7 @@ package flightmodules;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.sql.*;
 
 public class FlightFrame extends JFrame {
 
@@ -58,7 +59,35 @@ public class FlightFrame extends JFrame {
                 } else if (dep.equalsIgnoreCase(dest)) {
                     JOptionPane.showMessageDialog(FlightFrame.this, "Departure and Destination cannot be the same.");
                 } else {
-                    JOptionPane.showMessageDialog(FlightFrame.this, "Flight details validated successfully!");
+                    try {
+                        // Step 1: Register the JDBC Driver
+                        Class.forName("com.mysql.jdbc.Driver");
+
+                        // Step 2: Establish the Connection
+                        Connection con = DriverManager.getConnection(
+                            "jdbc:mysql://localhost:3306/flight_db", "root", "SSaaff@$123"
+                        );
+
+                        // Step 3: Create PreparedStatement
+                        String sql = "INSERT INTO flights VALUES (?, ?, ?, ?)";
+                        PreparedStatement pst = con.prepareStatement(sql);
+                        pst.setString(1, dep);
+                        pst.setString(2, dest);
+                        pst.setString(3, dt);
+                        pst.setString(4, fltNo);
+
+                        // Step 4: Execute the Query
+                        pst.executeUpdate();
+
+                        // Step 5: Close the Connection
+                        con.close();
+
+                        JOptionPane.showMessageDialog(FlightFrame.this, "Flight details saved to database!");
+                    } catch (ClassNotFoundException ex) {
+                        JOptionPane.showMessageDialog(FlightFrame.this, "JDBC Driver not found: " + ex.getMessage());
+                    } catch (SQLException ex) {
+                        JOptionPane.showMessageDialog(FlightFrame.this, "Database Error: " + ex.getMessage());
+                    }
                 }
             }
         });
@@ -78,8 +107,7 @@ public class FlightFrame extends JFrame {
         setVisible(true);
     }
 
-    public static void main(String [] args)
-    {
+    public static void main(String [] args) {
         new FlightFrame();
     }
 }

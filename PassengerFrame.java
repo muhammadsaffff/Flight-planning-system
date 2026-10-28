@@ -3,6 +3,7 @@ package flightmodules;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.sql.*;
 
 public class PassengerFrame extends JFrame {
 
@@ -61,10 +62,36 @@ public class PassengerFrame extends JFrame {
                         if (parsedAge <= 0 || parsedAge > 120) {
                             JOptionPane.showMessageDialog(PassengerFrame.this, "Please enter a valid age between 1 and 120.");
                         } else {
-                            JOptionPane.showMessageDialog(PassengerFrame.this, "Passenger details submitted successfully!");
+                            // Step 1: Register the JDBC Driver
+                            Class.forName("com.mysql.jdbc.Driver");
+
+                            // Step 2: Establish the Connection
+                            Connection con = DriverManager.getConnection(
+                                "jdbc:mysql://localhost:3306/flight_db", "root", "SSaaff@$123"
+                            );
+
+                            // Step 3: Create PreparedStatement
+                            String sql = "INSERT INTO passengers VALUES (?, ?, ?, ?)";
+                            PreparedStatement pst = con.prepareStatement(sql);
+                            pst.setString(1, nameText);
+                            pst.setInt(2, parsedAge);
+                            pst.setString(3, phoneText);
+                            pst.setString(4, emailText);
+
+                            // Step 4: Execute the Query
+                            pst.executeUpdate();
+
+                            // Step 5: Close the Connection
+                            con.close();
+
+                            JOptionPane.showMessageDialog(PassengerFrame.this, "Passenger details saved to database!");
                         }
                     } catch (NumberFormatException ex) {
                         JOptionPane.showMessageDialog(PassengerFrame.this, "Invalid Age! Please enter a valid whole number.");
+                    } catch (ClassNotFoundException ex) {
+                        JOptionPane.showMessageDialog(PassengerFrame.this, "JDBC Driver not found: " + ex.getMessage());
+                    } catch (SQLException ex) {
+                        JOptionPane.showMessageDialog(PassengerFrame.this, "Database Error: " + ex.getMessage());
                     }
                 }
             }
@@ -85,8 +112,7 @@ public class PassengerFrame extends JFrame {
         setVisible(true);
     }
 
-    public static void main(String [] args)
-    {
+    public static void main(String [] args) {
         new PassengerFrame();
     }
 }

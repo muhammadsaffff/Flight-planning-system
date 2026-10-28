@@ -3,6 +3,7 @@ package flightmodules;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.sql.*;
 
 public class BookFlightFrame extends JFrame {
 
@@ -61,10 +62,36 @@ public class BookFlightFrame extends JFrame {
                         if (parsedFare <= 0 || Double.isNaN(parsedFare) || Double.isInfinite(parsedFare)) {
                             JOptionPane.showMessageDialog(BookFlightFrame.this, "Fare must be a valid amount greater than zero.");
                         } else {
-                            JOptionPane.showMessageDialog(BookFlightFrame.this, "Booking Confirmed for " + passText + "!");
+                            // Step 1: Register the JDBC Driver
+                            Class.forName("com.mysql.jdbc.Driver");
+
+                            // Step 2: Establish the Connection
+                            Connection con = DriverManager.getConnection(
+                                "jdbc:mysql://localhost:3306/flight_db", "root", "SSaaff@$123"
+                            );
+
+                            // Step 3: Create PreparedStatement
+                            String sql = "INSERT INTO bookings VALUES (?, ?, ?, ?)";
+                            PreparedStatement pst = con.prepareStatement(sql);
+                            pst.setString(1, passText);
+                            pst.setString(2, fltText);
+                            pst.setString(3, clsText);
+                            pst.setDouble(4, parsedFare);
+
+                            // Step 4: Execute the Query
+                            pst.executeUpdate();
+
+                            // Step 5: Close the Connection
+                            con.close();
+
+                            JOptionPane.showMessageDialog(BookFlightFrame.this, "Booking Confirmed and saved for " + passText + "!");
                         }
                     } catch (NumberFormatException ex) {
                         JOptionPane.showMessageDialog(BookFlightFrame.this, "Invalid Fare! Please enter a valid numeric amount.");
+                    } catch (ClassNotFoundException ex) {
+                        JOptionPane.showMessageDialog(BookFlightFrame.this, "JDBC Driver not found: " + ex.getMessage());
+                    } catch (SQLException ex) {
+                        JOptionPane.showMessageDialog(BookFlightFrame.this, "Database Error: " + ex.getMessage());
                     }
                 }
             }
@@ -85,8 +112,7 @@ public class BookFlightFrame extends JFrame {
         setVisible(true);
     }
 
-    public static void main(String [] agrs)
-    {
+    public static void main(String [] agrs) {
         new BookFlightFrame();
     }
 }
