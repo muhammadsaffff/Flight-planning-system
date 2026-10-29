@@ -64,7 +64,7 @@ public class Managebookframe extends JFrame {
 
             // Change password if your MySQL root account uses one (e.g., "admin123")
             Connection con = DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/flight_db", "root", ""
+                "jdbc:mysql://localhost:3306/flight_db", "root", "SSaaff@$123"
             );
 
             String sql = "SELECT flight_no, departure, destination, flight_date, status FROM flights";
