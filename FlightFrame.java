@@ -6,89 +6,45 @@ import java.awt.event.*;
 import java.sql.*;
 
 public class FlightFrame extends JFrame {
+    JTextField flightNoField, departureField, destinationField, dateField;
 
-    FlightFrame() {
+    public FlightFrame() {
         setTitle("Flight Details");
-        setSize(500, 400);
+        setSize(450, 320);
         setLayout(new BorderLayout(10, 10));
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        JLabel title = new JLabel("FLIGHT DETAILS", JLabel.CENTER);
+        JLabel title = new JLabel("REGISTER FLIGHT ROUTE", JLabel.CENTER);
+        title.setFont(new Font("Arial", Font.BOLD, 15));
 
-        JLabel from = new JLabel("Departure:");
-        JTextField fromField = new JTextField(15);
+        JPanel formPanel = new JPanel(new GridLayout(4, 2, 10, 10));
+        formPanel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
 
-        JLabel to = new JLabel("Destination:");
-        JTextField toField = new JTextField(15);
+        formPanel.add(new JLabel("Flight No:"));
+        flightNoField = new JTextField();
+        formPanel.add(flightNoField);
 
-        JLabel date = new JLabel("Date:");
-        JTextField dateField = new JTextField(15);
+        formPanel.add(new JLabel("Departure City:"));
+        departureField = new JTextField();
+        formPanel.add(departureField);
 
-        JLabel flightNo = new JLabel("Flight No:");
-        JTextField flightField = new JTextField(15);
+        formPanel.add(new JLabel("Destination City:"));
+        destinationField = new JTextField();
+        formPanel.add(destinationField);
 
-        JPanel formPanel = new JPanel(new GridLayout(4, 2, 10, 15));
-        formPanel.add(from);
-        formPanel.add(fromField);
-        formPanel.add(to);
-        formPanel.add(toField);
-        formPanel.add(date);
+        formPanel.add(new JLabel("Flight Date (YYYY-MM-DD):"));
+        dateField = new JTextField();
         formPanel.add(dateField);
-        formPanel.add(flightNo);
-        formPanel.add(flightField);
-
-        JPanel centerWrapper = new JPanel(new FlowLayout());
-        centerWrapper.add(formPanel);
-
-        JButton searchButton = new JButton("Search");
-        JButton backButton = new JButton("Back");
 
         JPanel buttonPanel = new JPanel(new FlowLayout());
-        buttonPanel.add(searchButton);
+        JButton submitButton = new JButton("Save Flight");
+        JButton backButton = new JButton("Back to Dashboard");
+        buttonPanel.add(submitButton);
         buttonPanel.add(backButton);
 
-        searchButton.addActionListener(new ActionListener() {
+        submitButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                String dep = fromField.getText().trim();
-                String dest = toField.getText().trim();
-                String dt = dateField.getText().trim();
-                String fltNo = flightField.getText().trim();
-
-                if (dep.isEmpty() || dest.isEmpty() || dt.isEmpty() || fltNo.isEmpty()) {
-                    JOptionPane.showMessageDialog(FlightFrame.this, "Please fill in all flight fields.");
-                } else if (dep.equalsIgnoreCase(dest)) {
-                    JOptionPane.showMessageDialog(FlightFrame.this, "Departure and Destination cannot be the same.");
-                } else {
-                    try {
-                        // Step 1: Register the JDBC Driver
-                        Class.forName("com.mysql.jdbc.Driver");
-
-                        // Step 2: Establish the Connection
-                        Connection con = DriverManager.getConnection(
-                            "jdbc:mysql://localhost:3306/flight_db", "root", "SSaaff@$123"
-                        );
-
-                        // Step 3: Create PreparedStatement
-                        String sql = "INSERT INTO flights VALUES (?, ?, ?, ?)";
-                        PreparedStatement pst = con.prepareStatement(sql);
-                        pst.setString(1, dep);
-                        pst.setString(2, dest);
-                        pst.setString(3, dt);
-                        pst.setString(4, fltNo);
-
-                        // Step 4: Execute the Query
-                        pst.executeUpdate();
-
-                        // Step 5: Close the Connection
-                        con.close();
-
-                        JOptionPane.showMessageDialog(FlightFrame.this, "Flight details saved to database!");
-                    } catch (ClassNotFoundException ex) {
-                        JOptionPane.showMessageDialog(FlightFrame.this, "JDBC Driver not found: " + ex.getMessage());
-                    } catch (SQLException ex) {
-                        JOptionPane.showMessageDialog(FlightFrame.this, "Database Error: " + ex.getMessage());
-                    }
-                }
+                saveFlightData();
             }
         });
 
@@ -100,14 +56,69 @@ public class FlightFrame extends JFrame {
         });
 
         add(title, BorderLayout.NORTH);
-        add(centerWrapper, BorderLayout.CENTER);
+        add(formPanel, BorderLayout.CENTER);
         add(buttonPanel, BorderLayout.SOUTH);
 
         setLocationRelativeTo(null);
         setVisible(true);
     }
 
-    public static void main(String [] args) {
+    private void saveFlightData() {
+        String flightNo = flightNoField.getText().trim();
+        String departure = departureField.getText().trim();
+        String destination = destinationField.getText().trim();
+        String date = dateField.getText().trim();
+
+        if (flightNo.isEmpty() || departure.isEmpty() || destination.isEmpty() || date.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please fill in all flight route fields.", "Input Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (departure.equalsIgnoreCase(destination)) {
+            JOptionPane.showMessageDialog(this, "Departure and Destination cities cannot be the same.", "Route Error", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            try {
+                Class.forName("com.mysql.jdbc.Driver");
+            } catch (ClassNotFoundException ex) {
+                JOptionPane.showMessageDialog(this, "JDBC Driver not found.", "Driver Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        }
+
+        String url = "jdbc:mysql://localhost:3306/flight_db";
+        String user = "root";
+        String password = "SSaaff@$123";
+
+        String sql = "INSERT INTO flights (flight_no, departure, destination, flight_date) VALUES (?, ?, ?, ?)";
+
+        try (Connection con = DriverManager.getConnection(url, user, password);
+             PreparedStatement pst = con.prepareStatement(sql)) {
+
+            pst.setString(1, flightNo);
+            pst.setString(2, departure);
+            pst.setString(3, destination);
+            pst.setString(4, date);
+
+            int rowsInserted = pst.executeUpdate();
+            if (rowsInserted > 0) {
+                JOptionPane.showMessageDialog(this, "Flight route added to database! It will now appear in Travel History.");
+                flightNoField.setText("");
+                departureField.setText("");
+                destinationField.setText("");
+                dateField.setText("");
+            }
+
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Database Error: " + ex.getMessage(), "SQL Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    public static void main(String[] args) {
         new FlightFrame();
     }
 }

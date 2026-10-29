@@ -12,14 +12,15 @@ public class Managebookframe extends JFrame {
     DefaultTableModel tableModel;
 
     public Managebookframe() {
-        setTitle("Travel History - Flight Status & History");
+        setTitle("Travel History - Flight Details");
         setSize(700, 450);
         setLayout(new BorderLayout(10, 10));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        JLabel title = new JLabel("FLIGHT TRAVEL HISTORY & STATUS", JLabel.CENTER);
+        JLabel title = new JLabel("FLIGHT TRAVEL HISTORY", JLabel.CENTER);
 
-        String[] columns = {"Flight No", "Departure", "Destination", "Date", "Status"};
+        // 4 columns without status
+        String[] columns = {"Flight No", "Departure", "Destination", "Date"};
 
         tableModel = new DefaultTableModel(columns, 0);
         table = new JTable(tableModel);
@@ -62,12 +63,12 @@ public class Managebookframe extends JFrame {
         try {
             Class.forName("com.mysql.jdbc.Driver");
 
-            // Change password if your MySQL root account uses one (e.g., "admin123")
+            // Update password if your MySQL root account uses one (e.g., "root", "your_password")
             Connection con = DriverManager.getConnection(
                 "jdbc:mysql://localhost:3306/flight_db", "root", "SSaaff@$123"
             );
 
-            String sql = "SELECT flight_no, departure, destination, flight_date, status FROM flights";
+            String sql = "SELECT flight_no, departure, destination, flight_date FROM flights";
             Statement stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
 
@@ -76,9 +77,8 @@ public class Managebookframe extends JFrame {
                 String departure = rs.getString("departure");
                 String destination = rs.getString("destination");
                 String date = rs.getString("flight_date");
-                String status = rs.getString("status");
 
-                Object[] row = { flightNo, departure, destination, date, status };
+                Object[] row = { flightNo, departure, destination, date };
                 tableModel.addRow(row);
             }
 
