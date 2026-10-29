@@ -9,6 +9,7 @@ public class Dashboardframe extends JFrame {
     Dashboardframe() {
         setTitle("Flight Planning System - Dashboard");
         setSize(600, 450);
+        setResizable(false);
         setLayout(new BorderLayout(15, 15));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
