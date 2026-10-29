@@ -12,6 +12,7 @@ public class BookFlightFrame extends JFrame {
     public BookFlightFrame() {
         setTitle("Book Flight");
         setSize(500, 420);
+        setResizable(false);
         setLayout(new BorderLayout(10, 10));
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 

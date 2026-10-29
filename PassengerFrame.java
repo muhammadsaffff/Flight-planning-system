@@ -11,6 +11,7 @@ public class PassengerFrame extends JFrame {
     public PassengerFrame() {
         setTitle("Passenger Details");
         setSize(450, 320);
+        setResizable(false);
         setLayout(new BorderLayout(10, 10));
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 

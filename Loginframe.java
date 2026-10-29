@@ -9,6 +9,7 @@ public class Loginframe extends JFrame {
     Loginframe() {
         setTitle("Flight Planning System");
         setSize(500, 300);
+        setResizable(false);
         setLayout(new BorderLayout(10, 10));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
