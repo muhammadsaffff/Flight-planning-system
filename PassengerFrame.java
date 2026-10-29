@@ -6,94 +6,45 @@ import java.awt.event.*;
 import java.sql.*;
 
 public class PassengerFrame extends JFrame {
+    JTextField nameField, ageField, phoneField, emailField;
 
-    PassengerFrame() {
+    public PassengerFrame() {
         setTitle("Passenger Details");
-        setSize(500, 400);
+        setSize(450, 320);
         setLayout(new BorderLayout(10, 10));
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        JLabel title = new JLabel("PASSENGER DETAILS", JLabel.CENTER);
+        JLabel title = new JLabel("ENTER PASSENGER DETAILS", JLabel.CENTER);
+        title.setFont(new Font("Arial", Font.BOLD, 15));
 
-        JLabel name = new JLabel("Name:");
-        JTextField nameField = new JTextField(15);
+        JPanel formPanel = new JPanel(new GridLayout(4, 2, 10, 10));
+        formPanel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
 
-        JLabel age = new JLabel("Age:");
-        JTextField ageField = new JTextField(15);
-
-        JLabel phone = new JLabel("Phone:");
-        JTextField phoneField = new JTextField(15);
-
-        JLabel email = new JLabel("Email:");
-        JTextField emailField = new JTextField(15);
-
-        JPanel formPanel = new JPanel(new GridLayout(4, 2, 10, 15));
-        formPanel.add(name);
+        formPanel.add(new JLabel("Full Name:"));
+        nameField = new JTextField();
         formPanel.add(nameField);
-        formPanel.add(age);
+
+        formPanel.add(new JLabel("Age:"));
+        ageField = new JTextField();
         formPanel.add(ageField);
-        formPanel.add(phone);
+
+        formPanel.add(new JLabel("Phone Number:"));
+        phoneField = new JTextField();
         formPanel.add(phoneField);
-        formPanel.add(email);
+
+        formPanel.add(new JLabel("Email Address:"));
+        emailField = new JTextField();
         formPanel.add(emailField);
 
-        JPanel centerWrapper = new JPanel(new FlowLayout());
-        centerWrapper.add(formPanel);
-
-        JButton submitButton = new JButton("Submit");
-        JButton backButton = new JButton("Back");
-
         JPanel buttonPanel = new JPanel(new FlowLayout());
+        JButton submitButton = new JButton("Save Passenger");
+        JButton backButton = new JButton("Back to Dashboard");
         buttonPanel.add(submitButton);
         buttonPanel.add(backButton);
 
         submitButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                String nameText = nameField.getText().trim();
-                String ageText = ageField.getText().trim();
-                String phoneText = phoneField.getText().trim();
-                String emailText = emailField.getText().trim();
-
-                if (nameText.isEmpty() || ageText.isEmpty() || phoneText.isEmpty() || emailText.isEmpty()) {
-                    JOptionPane.showMessageDialog(PassengerFrame.this, "Please fill in all passenger fields.");
-                } else {
-                    try {
-                        int parsedAge = Integer.parseInt(ageText);
-                        if (parsedAge <= 0 || parsedAge > 120) {
-                            JOptionPane.showMessageDialog(PassengerFrame.this, "Please enter a valid age between 1 and 120.");
-                        } else {
-                            // Step 1: Register the JDBC Driver
-                            Class.forName("com.mysql.jdbc.Driver");
-
-                            // Step 2: Establish the Connection
-                            Connection con = DriverManager.getConnection(
-                                "jdbc:mysql://localhost:3306/flight_db", "root", "SSaaff@$123"
-                            );
-
-                            // Step 3: Create PreparedStatement
-                            String sql = "INSERT INTO passengers VALUES (?, ?, ?, ?)";
-                            PreparedStatement pst = con.prepareStatement(sql);
-                            pst.setString(1, nameText);
-                            pst.setInt(2, parsedAge);
-                            pst.setString(3, phoneText);
-                            pst.setString(4, emailText);
-
-                            // Step 4: Execute the Query
-                            pst.executeUpdate();
-
-                            // Step 5: Close the Connection
-                            con.close();
-
-                            JOptionPane.showMessageDialog(PassengerFrame.this, "Passenger details saved to database!");
-                        }
-                    } catch (NumberFormatException ex) {
-                        JOptionPane.showMessageDialog(PassengerFrame.this, "Invalid Age! Please enter a valid whole number.");
-                    } catch (ClassNotFoundException ex) {
-                        JOptionPane.showMessageDialog(PassengerFrame.this, "JDBC Driver not found: " + ex.getMessage());
-                    } catch (SQLException ex) {
-                        JOptionPane.showMessageDialog(PassengerFrame.this, "Database Error: " + ex.getMessage());
-                    }
-                }
+                savePassengerData();
             }
         });
 
@@ -105,14 +56,79 @@ public class PassengerFrame extends JFrame {
         });
 
         add(title, BorderLayout.NORTH);
-        add(centerWrapper, BorderLayout.CENTER);
+        add(formPanel, BorderLayout.CENTER);
         add(buttonPanel, BorderLayout.SOUTH);
 
         setLocationRelativeTo(null);
         setVisible(true);
     }
 
-    public static void main(String [] args) {
+    private void savePassengerData() {
+        String name = nameField.getText().trim();
+        String ageText = ageField.getText().trim();
+        String phone = phoneField.getText().trim();
+        String email = emailField.getText().trim();
+
+        // Validate empty fields
+        if (name.isEmpty() || ageText.isEmpty() || phone.isEmpty() || email.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please fill in all passenger fields.", "Input Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Validate age integer conversion
+        int age;
+        try {
+            age = Integer.parseInt(ageText);
+            if (age <= 0 || age > 120) {
+                JOptionPane.showMessageDialog(this, "Please enter a valid age between 1 and 120.", "Invalid Age", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Age must be a valid number.", "Number Format Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Load driver fallback
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            try {
+                Class.forName("com.mysql.jdbc.Driver");
+            } catch (ClassNotFoundException ex) {
+                JOptionPane.showMessageDialog(this, "JDBC Driver not found.", "Driver Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        }
+
+        String url = "jdbc:mysql://localhost:3306/flight_db";
+        String user = "root";
+        String password = "SSaaff@$123"; // Set your MySQL password if configured
+
+        String sql = "INSERT INTO passengers (name, age, phone, email) VALUES (?, ?, ?, ?)";
+
+        try (Connection con = DriverManager.getConnection(url, user, password);
+             PreparedStatement pst = con.prepareStatement(sql)) {
+
+            pst.setString(1, name);
+            pst.setInt(2, age);
+            pst.setString(3, phone);
+            pst.setString(4, email);
+
+            int rowsInserted = pst.executeUpdate();
+            if (rowsInserted > 0) {
+                JOptionPane.showMessageDialog(this, "Passenger record saved successfully to MySQL!");
+                nameField.setText("");
+                ageField.setText("");
+                phoneField.setText("");
+                emailField.setText("");
+            }
+
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Database Error: " + ex.getMessage(), "SQL Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    public static void main(String[] args) {
         new PassengerFrame();
     }
 }
